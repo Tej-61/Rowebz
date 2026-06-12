@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rowebz — Web & Game Dev Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #080808;
+      --bg2: #0f0f0f;
+      --bg3: #161616;
+      --border: rgba(255,255,255,0.07);
+      --white: #ffffff;
+      --off: rgba(255,255,255,0.55);
+      --mute: rgba(255,255,255,0.2);
+      --accent: #e8ff00;
+      --accent2: #a0ff00;
+      --red: #ff3c3c;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--white);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CUSTOM CURSOR ── */
+    .cursor {
+      position: fixed; top: 0; left: 0; z-index: 9999;
+      pointer-events: none; mix-blend-mode: difference;
+    }
+    .cursor-dot {
+      width: 8px; height: 8px; background: var(--white);
+      border-radius: 50%; position: absolute;
+      transform: translate(-50%, -50%);
+      transition: transform .1s;
+    }
+    .cursor-ring {
+      width: 36px; height: 36px; border: 1px solid rgba(255,255,255,0.5);
+      border-radius: 50%; position: absolute;
+      transform: translate(-50%, -50%);
+      transition: all .18s ease;
+    }
+
+    /* ── LOADER ── */
+    #loader {
+      position: fixed; inset: 0; background: var(--bg); z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 1.5rem;
+    }
+    .loader-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 10vw, 7rem);
+      letter-spacing: 0.1em;
+      color: var(--white);
+    }
+    .loader-text span { color: var(--accent); }
+    .loader-bar-wrap { width: 200px; height: 1px; background: var(--border); }
+    .loader-bar { height: 100%; background: var(--accent); width: 0%; transition: width .05s linear; }
+    .loader-pct {
+      font-family: 'Space Mono', monospace; font-size: 0.72rem;
+      color: var(--mute); letter-spacing: 0.1em;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 4vw; height: 64px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,8,8,0.85);
+      backdrop-filter: blur(16px);
+    }
+    .n-logo {
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem;
+      letter-spacing: 0.12em; color: var(--white); text-decoration: none;
+    }
+    .n-logo span { color: var(--accent); }
+    .n-links { display: flex; gap: 2.5rem; list-style: none; }
+    .n-links a {
+      font-family: 'Space Mono', monospace; font-size: 0.68rem;
+      font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--off); text-decoration: none; transition: color .2s;
+    }
+    .n-links a:hover { color: var(--accent); }
+    .n-btn {
+      font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      border: 1px solid var(--border); color: var(--white);
+      padding: 0.5rem 1.2rem; text-decoration: none;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .n-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh; padding: 120px 4vw 80px;
+      display: flex; flex-direction: column; justify-content: center;
+      border-bottom: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .hero-grain {
+      position: absolute; inset: 0; opacity: 0.03; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+    .hero-tag {
+      font-family: 'Space Mono', monospace; font-size: 0.72rem;
+      letter-spacing: 0.15em; text-transform: uppercase; color: var(--mute);
+      margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem;
+    }
+    .hero-tag::before { content: ''; width: 32px; height: 1px; background: var(--mute); }
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(5rem, 14vw, 14rem);
+      line-height: 0.92; letter-spacing: 0.02em;
+      color: var(--white); margin-bottom: 0;
+    }
+    .hero h1 .outline {
+      -webkit-text-stroke: 1px rgba(255,255,255,0.25);
+      color: transparent;
+    }
+    .hero h1 .accent { color: var(--accent); }
+    .hero-sub-row {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-top: 3rem; flex-wrap: wrap; gap: 2rem;
+      border-top: 1px solid var(--border); padding-top: 2rem;
+    }
+    .hero-desc { font-size: 0.95rem; color: var(--off); line-height: 1.8; max-width: 420px; font-weight: 300; }
+    .hero-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .btn-fill {
+      font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      background: var(--accent); color: var(--bg);
+      padding: 0.8rem 1.75rem; text-decoration: none;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-fill:hover { opacity: 0.85; transform: translateY(-2px); }
+    .btn-ghost {
+      font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      border: 1px solid var(--border); color: var(--off);
+      padding: 0.8rem 1.75rem; text-decoration: none;
+      transition: color .2s, border-color .2s, transform .15s;
+    }
+    .btn-ghost:hover { color: var(--white); border-color: var(--off); transform: translateY(-2px); }
+    .hero-scroll {
+      position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--mute);
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    }
+    .scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--mute), transparent); animation: scrollpulse 2s ease-in-out infinite; }
+    @keyframes scrollpulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+    /* ── TICKER ── */
+    .ticker {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden; padding: 0.75rem 0;
+      background: var(--bg2);
+    }
+    .ticker-track {
+      display: flex; width: max-content;
+      animation: tick 20s linear infinite;
+    }
+    @keyframes tick { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .ticker-item {
+      font-family: 'Space Mono', monospace; font-size: 0.7rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--mute); white-space: nowrap; padding: 0 2.5rem;
+      display: flex; align-items: center; gap: 2.5rem;
+    }
+    .ticker-item::after { content: '✦'; color: var(--accent); font-size: 0.55rem; }
+
+    /* ── SECTION BASE ── */
+    .sec { padding: 100px 4vw; border-bottom: 1px solid var(--border); }
+    .sec-meta {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;
+    }
+    .sec-code {
+      font-family: 'Space Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+    }
+    .sec-line { flex: 1; height: 1px; background: var(--border); }
+    .sec-h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 7vw, 6rem);
+      letter-spacing: 0.05em; line-height: 1;
+      color: var(--white); margin-bottom: 3.5rem;
+    }
+
+    /* ── SERVICES ── */
+    .svc-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      border: 1px solid var(--border);
+    }
+    .svc-card {
+      padding: 2.5rem; border: 1px solid var(--border);
+      position: relative; overflow: hidden;
+      transition: background .3s;
+    }
+    .svc-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: var(--accent); opacity: 0;
+      transition: opacity .3s; z-index: 0;
+    }
+    .svc-card:hover::before { opacity: 0.04; }
+    .svc-card > * { position: relative; z-index: 1; }
+    .svc-num {
+      font-family: 'Space Mono', monospace; font-size: 0.65rem;
+      color: var(--mute); letter-spacing: 0.1em; margin-bottom: 1.75rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .svc-num::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .svc-icon { font-size: 2.2rem; margin-bottom: 1rem; display: block; }
+    .svc-card h3 {
+      font-family: 'Bebas Neue', sans-serif; font-size: 2rem;
+      letter-spacing: 0.06em; color: var(--white); margin-bottom: 0.75rem;
+    }
+    .svc-card p { font-size: 0.875rem; color: var(--off); line-height: 1.75; font-weight: 300; }
+    .svc-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1.5rem; }
+    .svc-tag {
+      font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 0.06em;
+      padding: 0.2rem 0.6rem; border: 1px solid var(--border); color: var(--mute);
+    }
+
+    /* ── HIRING ── */
+    .hiring-intro { font-size: 0.95rem; color: var(--off); max-width: 500px; line-height: 1.8; font-weight: 300; margin-bottom: 3rem; }
+    .roles { border-top: 1px solid var(--border); }
+    .role-row {
+      display: grid; grid-template-columns: 1fr auto;
+      align-items: center; gap: 2rem;
+      padding: 1.75rem 0; border-bottom: 1px solid var(--border);
+      transition: padding-left .25s;
+    }
+    .role-row:hover { padding-left: 1rem; }
+    .role-row:hover .role-apply { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    .role-name {
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem;
+      letter-spacing: 0.06em; color: var(--white); line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .role-meta { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+    .role-stack { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--mute); letter-spacing: 0.06em; }
+    .rbadge {
+      font-family: 'Space Mono', monospace; font-size: 0.6rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.18rem 0.55rem; border: 1px solid;
+    }
+    .rbadge.urgent { border-color: rgba(255,100,50,0.4); color: #ff8060; }
+    .rbadge.open { border-color: rgba(160,255,0,0.3); color: var(--accent2); }
+    .rbadge.remote { border-color: var(--border); color: var(--mute); }
+    .role-apply {
+      font-family: 'Space Mono', monospace; font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      border: 1px solid var(--border); color: var(--off);
+      padding: 0.6rem 1.2rem; text-decoration: none;
+      transition: background .2s, color .2s, border-color .2s; white-space: nowrap;
+    }
+
+    /* ── PROCESS ── */
+    .proc-list { border-top: 1px solid var(--border); }
+    .proc-row {
+      display: grid; grid-template-columns: 100px 1fr;
+      gap: 3rem; padding: 2.5rem 0;
+      border-bottom: 1px solid var(--border); align-items: start;
+    }
+    .proc-n {
+      font-family: 'Bebas Neue', sans-serif; font-size: 4rem;
+      color: var(--border); letter-spacing: 0.05em; line-height: 1;
+    }
+    .proc-content h3 {
+      font-family: 'Bebas Neue', sans-serif; font-size: 2rem;
+      letter-spacing: 0.06em; color: var(--white); margin-bottom: 0.6rem;
+    }
+    .proc-content p { font-size: 0.9rem; color: var(--off); line-height: 1.8; font-weight: 300; max-width: 560px; }
+
+    /* ── CONTACT ── */
+    .contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 6rem; align-items: start; }
+    .contact-label {
+      font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 6vw, 5rem);
+      letter-spacing: 0.06em; color: var(--white); line-height: 1; margin-bottom: 2rem;
+    }
+    .contact-detail { display: flex; flex-direction: column; gap: 1.25rem; }
+    .c-item { display: flex; gap: 1rem; align-items: flex-start; }
+    .c-icon-box {
+      width: 36px; height: 36px; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; flex-shrink: 0; color: var(--off);
+    }
+    .c-txt { font-size: 0.85rem; color: var(--off); line-height: 1.6; }
+    .c-txt strong { display: block; color: var(--white); font-size: 0.8rem; font-weight: 600; margin-bottom: 0.1rem; }
+
+    .c-form { display: flex; flex-direction: column; gap: 1rem; }
+    .c-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .c-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .c-group label {
+      font-family: 'Space Mono', monospace; font-size: 0.62rem;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--mute);
+    }
+    .c-group input, .c-group select, .c-group textarea {
+      background: var(--bg2); border: 1px solid var(--border);
+      color: var(--white); font-family: 'Inter', sans-serif;
+      font-size: 0.88rem; padding: 0.75rem 0.9rem; outline: none;
+      transition: border-color .2s;
+    }
+    .c-group input::placeholder, .c-group textarea::placeholder { color: var(--mute); }
+    .c-group input:focus, .c-group select:focus, .c-group textarea:focus { border-color: var(--accent); }
+    .c-group select option { background: var(--bg2); }
+    .c-group textarea { resize: vertical; min-height: 110px; }
+    .c-submit {
+      font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      background: var(--accent); color: var(--bg);
+      padding: 0.9rem 2rem; border: none; cursor: pointer;
+      transition: opacity .2s, transform .15s; margin-top: 0.25rem;
+    }
+    .c-submit:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 1.5rem 4vw;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .f-logo {
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem;
+      letter-spacing: 0.12em; color: var(--white); text-decoration: none;
+    }
+    .f-logo span { color: var(--accent); }
+    footer p { font-family: 'Space Mono', monospace; font-size: 0.62rem; color: var(--mute); letter-spacing: 0.08em; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--accent); color: var(--bg);
+      font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+      padding: 0.8rem 1.6rem; opacity: 0; transition: all .3s; z-index: 999; white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      .n-links { display: none; }
+      .hero h1 { font-size: clamp(4rem, 18vw, 7rem); }
+      .svc-grid { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .c-row { grid-template-columns: 1fr; }
+      .role-row { grid-template-columns: 1fr; }
+      .proc-row { grid-template-columns: 60px 1fr; gap: 1.5rem; }
+      .proc-n { font-size: 2.5rem; }
+      body { cursor: auto; }
+      .cursor { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor">
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+</div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-text">RO<span>W</span>EBZ</div>
+  <div class="loader-bar-wrap"><div class="loader-bar" id="loaderBar"></div></div>
+  <div class="loader-pct" id="loaderPct">0%</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="n-logo" href="#">RO<span>W</span>EBZ</a>
+  <ul class="n-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#hiring">Hiring</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a class="n-btn" href="#contact">Start a project ↗</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grain"></div>
+  <div class="hero-tag">Web & Game Development Studio · Est. 2026</div>
+  <h1>
+    WE<br/>
+    <span class="outline">BUILD</span><br/>
+    <span class="accent">DIGITAL.</span>
+  </h1>
+  <div class="hero-sub-row">
+    <p class="hero-desc">Rowebz is a fresh studio built for ambitious digital products. Web, games, design — made by people who care about the craft. We're hiring too.</p>
+    <div class="hero-btns">
+      <a class="btn-fill" href="#contact">Start a project →</a>
+      <a class="btn-ghost" href="#hiring">Join the team</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <div class="ticker-item">Web Development</div>
+    <div class="ticker-item">Game Development</div>
+    <div class="ticker-item">UI / UX Design</div>
+    <div class="ticker-item">Mobile Apps</div>
+    <div class="ticker-item">Now Hiring</div>
+    <div class="ticker-item">Remote Friendly</div>
+    <div class="ticker-item">Web Development</div>
+    <div class="ticker-item">Game Development</div>
+    <div class="ticker-item">UI / UX Design</div>
+    <div class="ticker-item">Mobile Apps</div>
+    <div class="ticker-item">Now Hiring</div>
+    <div class="ticker-item">Remote Friendly</div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section class="sec" id="services">
+  <div class="sec-meta">
+    <span class="sec-code">// 01 — Services</span>
+    <div class="sec-line"></div>
+  </div>
+  <div class="sec-h2 reveal">What We Build</div>
+  <div class="svc-grid reveal">
+    <div class="svc-card">
+      <div class="svc-num">01</div>
+      <span class="svc-icon">🌐</span>
+      <h3>Web Development</h3>
+      <p>Custom websites and web apps built with modern frameworks. Fast, responsive, and made to grow — from clean landing pages to complex platforms.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">React</span><span class="svc-tag">Next.js</span>
+        <span class="svc-tag">Node.js</span><span class="svc-tag">HTML / CSS</span>
+      </div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-num">02</div>
+      <span class="svc-icon">🎮</span>
+      <h3>Game Development</h3>
+      <p>2D and 3D games across mobile, PC, and browser. We handle design, mechanics, and build — Unity and beyond.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">Unity</span><span class="svc-tag">C#</span>
+        <span class="svc-tag">2D / 3D</span><span class="svc-tag">Mobile</span>
+      </div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-num">03</div>
+      <span class="svc-icon">🎨</span>
+      <h3>UI / UX Design</h3>
+      <p>Interfaces that make sense before they look good. Wireframes, prototypes, and pixel-perfect specs — ready for handoff.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">Figma</span><span class="svc-tag">Wireframing</span><span class="svc-tag">Prototyping</span>
+      </div>
+    </div>
+    <div class="svc-card">
+      <div class="svc-num">04</div>
+      <span class="svc-icon">📱</span>
+      <h3>Mobile Apps</h3>
+      <p>Cross-platform apps for iOS and Android. Built with React Native or Flutter — smooth UX, shipped with care.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">React Native</span><span class="svc-tag">Flutter</span>
+        <span class="svc-tag">iOS</span><span class="svc-tag">Android</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HIRING -->
+<section class="sec" id="hiring">
+  <div class="sec-meta">
+    <span class="sec-code">// 02 — Open Roles</span>
+    <div class="sec-line"></div>
+  </div>
+  <div class="sec-h2 reveal">We're Hiring</div>
+  <p class="hiring-intro reveal">We're a new studio and we're building a team of sharp, driven developers. Remote-first. Real work. No bureaucracy.</p>
+  <div class="roles reveal">
+    <div class="role-row">
+      <div>
+        <div class="role-name">Frontend Web Developer</div>
+        <div class="role-meta">
+          <span class="role-stack">React · Vue · HTML/CSS · Tailwind</span>
+          <span class="rbadge urgent">Urgent</span>
+          <span class="rbadge remote">Remote</span>
+        </div>
+      </div>
+      <a class="role-apply" href="#contact">Apply →</a>
+    </div>
+    <div class="role-row">
+      <div>
+        <div class="role-name">Backend Developer</div>
+        <div class="role-meta">
+          <span class="role-stack">Node.js · Python · REST · PostgreSQL</span>
+          <span class="rbadge open">Open</span>
+          <span class="rbadge remote">Remote</span>
+        </div>
+      </div>
+      <a class="role-apply" href="#contact">Apply →</a>
+    </div>
+    <div class="role-row">
+      <div>
+        <div class="role-name">Unity Game Developer</div>
+        <div class="role-meta">
+          <span class="role-stack">Unity · C# · 2D/3D · Mobile / PC</span>
+          <span class="rbadge urgent">Urgent</span>
+          <span class="rbadge remote">Remote</span>
+        </div>
+      </div>
+      <a class="role-apply" href="#contact">Apply →</a>
+    </div>
+    <div class="role-row">
+      <div>
+        <div class="role-name">Game UI / UX Designer</div>
+        <div class="role-meta">
+          <span class="role-stack">Figma · Game UI · Motion · Prototyping</span>
+          <span class="rbadge open">Open</span>
+          <span class="rbadge remote">Remote</span>
+        </div>
+      </div>
+      <a class="role-apply" href="#contact">Apply →</a>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="sec" id="process">
+  <div class="sec-meta">
+    <span class="sec-code">// 03 — How We Work</span>
+    <div class="sec-line"></div>
+  </div>
+  <div class="sec-h2 reveal">The Process</div>
+  <div class="proc-list reveal">
+    <div class="proc-row">
+      <div class="proc-n">01</div>
+      <div class="proc-content">
+        <h3>Discovery Call</h3>
+        <p>We understand your goals, timeline, and budget. No pitch — just an honest 30-minute conversation about what you want to build.</p>
+      </div>
+    </div>
+    <div class="proc-row">
+      <div class="proc-n">02</div>
+      <div class="proc-content">
+        <h3>Scope & Quote</h3>
+        <p>A clear, fixed proposal — scope, price, timeline. You know exactly what you're getting before we start. No surprises.</p>
+      </div>
+    </div>
+    <div class="proc-row">
+      <div class="proc-n">03</div>
+      <div class="proc-content">
+        <h3>Build</h3>
+        <p>We build in focused sprints. Weekly updates, live previews, open feedback. The work is always visible — no black boxes.</p>
+      </div>
+    </div>
+    <div class="proc-row">
+      <div class="proc-n">04</div>
+      <div class="proc-content">
+        <h3>Launch & Handoff</h3>
+        <p>We ship, test, and hand over everything cleanly — code, assets, docs. Post-launch support available on request.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="sec" id="contact">
+  <div class="sec-meta">
+    <span class="sec-code">// 04 — Contact</span>
+    <div class="sec-line"></div>
+  </div>
+  <div class="contact-grid">
+    <div>
+      <div class="contact-label reveal">Got a<br/>Project?<br/><span style="color:var(--accent)">Let's Talk.</span></div>
+      <div class="contact-detail reveal">
+        <div class="c-item">
+          <div class="c-icon-box">@</div>
+          <div class="c-txt"><strong>Email</strong>tez.youtub.2012@gmail.com</div>
+        </div>
+        <div class="c-item">
+          <div class="c-icon-box">◎</div>
+          <div class="c-txt"><strong>Availability</strong>Open to projects & new hires</div>
+        </div>
+        <div class="c-item">
+          <div class="c-icon-box">⚡</div>
+          <div class="c-txt"><strong>Response</strong>Within 24 hours</div>
+        </div>
+      </div>
+    </div>
+    <div class="c-form reveal">
+      <div class="c-row">
+        <div class="c-group">
+          <label>Name</label>
+          <input type="text" id="f-name" placeholder="Your name"/>
+        </div>
+        <div class="c-group">
+          <label>Email</label>
+          <input type="email" id="f-email" placeholder="you@email.com"/>
+        </div>
+      </div>
+      <div class="c-group">
+        <label>I'm here to…</label>
+        <select id="f-type">
+          <option value="">Select one</option>
+          <option>Hire Rowebz for a project</option>
+          <option>Apply — Frontend Web Developer</option>
+          <option>Apply — Backend Developer</option>
+          <option>Apply — Unity Game Developer</option>
+          <option>Apply — Game UI/UX Designer</option>
+          <option>General enquiry</option>
+        </select>
+      </div>
+      <div class="c-group">
+        <label>Message</label>
+        <textarea id="f-msg" placeholder="Tell us about your project or yourself…"></textarea>
+      </div>
+      <button class="c-submit" onclick="handleSubmit()">Send Message →</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a class="f-logo" href="#">RO<span>W</span>EBZ</a>
+  <p>© 2026 ROWEBZ · ALL RIGHTS RESERVED</p>
+  <p>WEB & GAME DEVELOPMENT STUDIO</p>
+</footer>
+
+<div id="toast">✓ MESSAGE SENT — WE'LL REPLY WITHIN 24HRS</div>
+
+<script>
+  // LOADER
+  let pct = 0;
+  const bar = document.getElementById('loaderBar');
+  const pctEl = document.getElementById('loaderPct');
+  const loaderEl = document.getElementById('loader');
+  const iv = setInterval(() => {
+    pct += Math.random() * 18;
+    if (pct >= 100) { pct = 100; clearInterval(iv); }
+    bar.style.width = pct + '%';
+    pctEl.textContent = Math.floor(pct) + '%';
+    if (pct === 100) {
+      setTimeout(() => {
+        loaderEl.style.opacity = '0';
+        loaderEl.style.transition = 'opacity .5s';
+        setTimeout(() => loaderEl.style.display = 'none', 500);
+      }, 300);
+    }
+  }, 80);
+
+  // CURSOR
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; dot.style.left = mx+'px'; dot.style.top = my+'px'; });
+  (function animRing() {
+    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+    ring.style.left = rx+'px'; ring.style.top = ry+'px';
+    requestAnimationFrame(animRing);
+  })();
+
+  // SCROLL REVEAL
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => { if (e.isIntersecting) { setTimeout(() => e.target.classList.add('visible'), i * 80); obs.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => obs.observe(r));
+
+  // SMOOTH SCROLL
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const t = document.querySelector(a.getAttribute('href'));
+      if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
+    });
+  });
+
+  // FORM
+  function handleSubmit() {
+    const n = document.getElementById('f-name').value.trim();
+    const em = document.getElementById('f-email').value.trim();
+    const t = document.getElementById('f-type').value;
+    const m = document.getElementById('f-msg').value.trim();
+    if (!n || !em || !t || !m) { alert('Please fill in all fields.'); return; }
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 4000);
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-email').value = '';
+    document.getElementById('f-type').value = '';
+    document.getElementById('f-msg').value = '';
+  }
+</script>
+</body>
+</html>
